@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PICTIONARY</title>
+    <link rel="stylesheet" type="text/css" href="./public/styles/indexstyle.css" />
+  </head>
+  <body background="./public/images/pic.jpg">
+
+  <!-- div bouton accueil -->
+
+    <div id="twobtn" class="twobtn">
+      <h2>BIENVENUE DANS PICTIONARY</h2>
+      <div id="twobtn2" class="twobtn2">
+        <button onclick="document.getElementById('id01').style.display='block'" style="width:auto;">Connexion</button>
+        <button onclick="document.getElementById('id02').style.display='block'" style="width:auto;">Inscription</button>
+      </div>
+    </div>
+
+  <!-- div login -->
+
+    <div id="id01" class="modal" >
+
+      <div  id="f" class="modal-content animate">
+        <div class="imgcontainer">
+          <span onclick="document.getElementById('id01').style.display='none'" class="close" title="Close Modal">&times;</span>
+          <img src="./public/images/canvaspic.jpg" alt="pictionary" class="pictionary">
+        </div>
+
+        <div class="container">
+          <label for="email"><b>Email</b></label>
+          <input type="text" id="login-form-email" placeholder="Entrer votre Email" name="email" required>
+
+          <label for="psw"><b>Mot de passe</b></label>
+          <input type="password"  id="login-form-password" placeholder="Entrer votre mot de pass" name="psw" required>
+
+          <button id="login-form-submit" >Valider</button>
+          <label>
+            <input type="checkbox" checked="checked" name="remember"> Se souvenir de moi
+          </label>
+        </div>
+        <div class="container" style="background-color:#f1f1f1">
+          <button type="button" onclick="document.getElementById('id01').style.display='none'" class="cancelbtn">Cancel</button>
+          <span class="psw"><a href="#">Mot de passe</a> oublié ? </span>
+        </div>
+      </div>
+    </div>
+
+  <!-- div inscription -->
+
+    <div id="id02" class="modal">
+
+      <div class="modal-content animate">
+        <div class="imgcontainer">
+          <span onclick="document.getElementById('id02').style.display='none'" class="close" title="Close Modal">&times;</span>
+          <img src="./public/images/canvaspic.jpg" alt="pictionary" class="pictionary">
+        </div>
+
+        <div class="container">
+          <label for="uname"><b>Nom du joueur</b></label>
+          <input type="text" id="register-form-uname" placeholder="Entrer votre nom" name="uname" required>
+
+          <label for="email"><b>Email</b></label>
+          <input type="text" id="register-form-email"  placeholder="Entrer votre Email" name="email" required>
+
+          <label for="psw"><b>Mot de passe</b></label>
+          <input type="password" id="register-form-password" placeholder="Entrer mot de pass" name="psw" required>
+
+          <label for="cpsw"><b>Confirmer mot de passe</b></label>
+          <input type="password" id="register-form-cpassword" placeholder="Confirmer votre mot de pass" name="cpsw" required>
+
+          <button id="Register-form-submit">Enregistrer</button>
+        </div>
+      </div>
+    </div>
+
+    <script src="http://code.jquery.com/jquery-latest.js"></script>
+   <script src="./public/scripts/form.js"></script>
+  </body>
+</html>
