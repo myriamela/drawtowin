@@ -1,0 +1,19 @@
+{
+  "name": "pictionary",
+  "version": "1.0.0",
+  "description": "pictionary, socket.io",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Helen Phan",
+  "license": "ISC",
+  "dependencies": {
+    "all": "0.0.0",
+    "body-parser": "^1.18.2",
+    "express": "^4.14.0",
+    "mysql": "^2.15.0",
+    "socket.io": "^1.7.4",
+    "socket.js": "^0.1.4"
+  }
+}

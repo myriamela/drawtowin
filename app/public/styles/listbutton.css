@@ -1,0 +1,21 @@
+
+.button {
+  border: none;
+  background-color: inherit;
+  padding: 16px 50px;
+  font-size: 30px;
+  cursor: pointer;
+  display: inline-block;
+  display: block;
+  margin: 10px 500px;
+  color: white;
+  text-align: center;
+  text-decoration: none;
+  border: none;
+  cursor: pointer;
+  margin-top: 60px;
+}
+
+.button:hover {
+  background: linear-gradient(to bottom right, #33ccff 5%, #000099 78%);
+}
