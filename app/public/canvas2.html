@@ -30,10 +30,11 @@
         <div class="row">
           <canvas id="canvas" class="whiteboard"></canvas>
           <div class="users"><ul></ul>
-            <div id="guesses"></div>
-            <img src="images/canvaspic.jpg">
+            <div id="guesses"></div><br>
+            <img src="images/canvaspic.jpg" class="canvaspic">
+
             <div class="draw-buttons">
-              <h3>Choisir une couleur</h3>
+
               <button value="0" class="clear" type="button">X</button>
               <button value="#000000" class="black" type="button"></button>
               <button value="#0000EE" class="blue" type="button"></button>
@@ -51,3 +52,13 @@
     <script src="/socket.io/socket.io.js"></script><script src="scripts/whiteboard.js"></script>
   </body>
 </html>
+
+
+<!--
+let users = [];
+var person = [];
+let userlist = function(names) {
+    users = names;
+    for (let i = 0; i < names.length; i++) {
+        person[i]=  names[i];
+      };-->

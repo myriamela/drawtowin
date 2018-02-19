@@ -131,6 +131,7 @@ let words = [
 
 function newWord() {
 	wordcount = Math.floor(Math.random() * (words.length));
+  console.log(words[wordcount]);
 	return words[wordcount];
 };
 
@@ -144,7 +145,7 @@ io.on('connection', function (socket) {
 
 		// user automatically joins a room under their own name
 		socket.join(name);
-		console.log(socket.username + ' has joined. ID: ' + socket.id);
+		//console.log(socket.username + ' has joined. ID: ' + socket.id);
 
 		// save the name of the user to an array called users
 		users.push(socket.username);
@@ -157,11 +158,11 @@ io.on('connection', function (socket) {
 
 			// server submits the 'drawer' event to this user
 			io.in(socket.username).emit('drawer', socket.username);
-			console.log(socket.username + ' is a drawer');
+			//console.log(socket.username + ' is a drawer');
 
 			// send the random word to the user inside the 'drawer' room
 			io.in(socket.username).emit('draw word', newWord());
-		//	console.log(socket.username + "'s draw word (join event): " + newWord());
+			console.log(socket.username + "'s draw word (join event): " + newWord());
 		}
 
 		// if there are more than one names in users
@@ -173,7 +174,7 @@ io.on('connection', function (socket) {
 
 			// server submits the 'guesser' event to this user
 			io.in(socket.username).emit('guesser', socket.username);
-			console.log(socket.username + ' is a guesser');
+			//console.log(socket.username + ' is a guesser');
 		}
 
 		// update all clients with the list of users
@@ -189,7 +190,7 @@ io.on('connection', function (socket) {
 	// submit each client's guesses to all clients
 	socket.on('guessword', function(data) {
 		io.emit('guessword', { username: data.username, guessword: data.guessword})
-		console.log('guessword event triggered on server from: ' + data.username + ' with word: ' + data.guessword);
+	//	console.log('guessword event triggered on server from: ' + data.username + ' with word: ' + data.guessword);
 	});
 
 	socket.on('disconnect', function() {
@@ -200,7 +201,7 @@ io.on('connection', function (socket) {
 				users.splice(i, 1);
 			};
 		};
-		console.log(socket.username + ' has disconnected.');
+		//console.log(socket.username + ' has disconnected.');
 
 		// submit updated users list to all clients
 		io.emit('userlist', users);
@@ -210,7 +211,7 @@ io.on('connection', function (socket) {
 
 			// generate random number based on length of users list
 			let x = Math.floor(Math.random() * (users.length));
-			console.log(users[x]);
+			//console.log(users[x]);
 
 			// submit new drawer event to the random user in userslist
 			io.in(users[x]).emit('new drawer', users[x]);
@@ -220,11 +221,11 @@ io.on('connection', function (socket) {
 	socket.on('new drawer', function(name) {
 
 		// remove user from 'guesser' room
-		socket.leave('guesser');
+		//socket.leave('guesser');
 
 		// place user into 'drawer' room
 		socket.join('drawer');
-		console.log('new drawer emit: ' + name);
+		//console.log('new drawer emit: ' + name);
 
 		// submit 'drawer' event to the same user
 		socket.emit('drawer', name);
@@ -238,8 +239,8 @@ io.on('connection', function (socket) {
 	socket.on('swap rooms', function(data) {
 
 		// drawer leaves 'drawer' room and joins 'guesser' room
-		socket.leave('drawer');
-		socket.join('guesser');
+		//socket.leave('drawer');
+		//socket.join('guesser');
 
 		// submit 'guesser' event to this user
 		socket.emit('guesser', socket.username);
@@ -250,15 +251,15 @@ io.on('connection', function (socket) {
 		// submit random word to new user drawer
 		io.in(data.to).emit('draw word', newWord());
 
-		io.emit('reset', data.to);
+		//io.emit('reset', data.to);
 
 	});
 
-	socket.on('correct answer', function(data) {
+	/*socket.on('correct answer', function(data) {
 		io.emit('correct answer', data);
 		console.log(data.username + ' guessed correctly with ' + data.guessword);
 	});
-
+*/
 	socket.on('clear screen', function(name) {
 		io.emit('clear screen', name);
 	});

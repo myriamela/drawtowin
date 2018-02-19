@@ -70,17 +70,18 @@ ul>li {
 
 .draw-buttons, #guesses {
     text-align: center;
-    margin-bottom: -30px;
+    margin-bottom: -20px;
+
 }
 
 .draw-buttons {
     height: 35px;
-}
+  }
 
 #guesses {
     font-style: italic;
     font-size: 16px;
-    height: 28px;
+    height: 50px;
 }
 
 button {
@@ -102,8 +103,15 @@ h1 {
 
 .chatbox-header
 {
-/* background: linear-gradient(to bottom right, #33ccff 5%, #000099 78%);*/
-
+ background: linear-gradient(to bottom right, #33ccff 5%, #000099 78%);
+ background-color: inherit;
+ height: 90px;
+}
+.chatbox-header2
+{
+ background: linear-gradient(to bottom right, #33ccff 5%, #000099 78%);
+ background-color: inherit;
+ height: 10px;
 }
 #guess, .draw {
     background-color: white;
@@ -219,4 +227,9 @@ canvas {
     height: 50px;
     background-color: blue;
     font-size: 30px;
+}
+
+.canvaspic{
+  position: relative;
+  width: 100%;
 }

@@ -4,10 +4,15 @@ let socket = io();
 let user;
 
 function usernameAsk() {
+  //const $registerformuname = $('#register-form-uname');
+
+
     $('.grey-out').fadeIn(500);
     $('.user').fadeIn(500);
     $('.user').submit(function(){
         event.preventDefault();
+  //user =$registerformuname.val();
+  console.log(user);
         user = $('#username').val().trim();
 
         if (user == '') {
@@ -39,10 +44,10 @@ let clearScreen = function() {
 let guesser = function() {
     clearScreen();
     click = false;
-    console.log('draw status: ' + click);
+    //console.log('draw status: ' + click);
     $('.draw').hide();
     $('#guesses').empty();
-    console.log('You are a guesser');
+  //  console.log('You are a guesser');
     $('#guess').show();
     $('.guess-input').focus();
 
@@ -54,18 +59,18 @@ let guesser = function() {
             return false
         };
 
-        console.log(user + "'s guess: " + guess);
+    //    console.log(user + "'s guess: " + guess);
         socket.emit('guessword', {username: user, guessword: guess});
         $('.guess-input').val('');
     });
 };
 
 let guessword = function(data){
-    $('#guesses').text(data.username + "'s guess: " + data.guessword);
+  //  $('#guesses').text(data.username + "'s guess: " + data.guessword);
 
     if (click == true && data.guessword == $('span.word').text() ) {
-        console.log('guesser: ' + data.username + ' draw-word: ' + $('span.word').text());
-        socket.emit('correct answer', {username: data.username, guessword: data.guessword});
+      //  console.log('guesser: ' + data.username + ' draw-word: ' + $('span.word').text());
+      //  socket.emit('correct answer', {username: data.username, guessword: data.guessword});
         socket.emit('swap rooms', {from: user, to: data.username});
         click = false;
     }
@@ -73,14 +78,15 @@ let guessword = function(data){
 
 let drawWord = function(word) {
     $('span.word').text(word);
-    console.log('Your word to draw is: ' + word);
+  //  console.log('Your word to draw is: ' + word);
 };
 
 let users = [];
 
 let userlist = function(names) {
     users = names;
-    let html = '<p class="chatbox-header">' + 'Joueurs' +'<img src="images/head.gif" height=70px  width=70px><img src="images/head.gif" height=70px  width=70px>'+ '</p>';
+    let html = '<p class="chatbox-header">'+'<br>' + '&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +'<img src="images/head.gif" height=70px  width=70px><img src="images/head.gif" height=70px  width=70px>'+ '</p>';
+      html +='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp&nbsp;&nbsp;&nbsp;&nbsp;';
     for (let i = 0; i < names.length; i++) {
         html += '<li>' + names[i] + '</li>';
     };
@@ -92,18 +98,19 @@ let newDrawer = function() {
     clearScreen();
     $('#guesses').empty();
 };
-
+/*
 let correctAnswer = function(data) {
     $('#guesses').html('<p>' + data.username + ' guessed correctly!' + '</p>');
 };
-
+*/
+/*
 let reset = function(name) {
     clearScreen();
     $('#guesses').empty();
-    console.log('New drawer: ' + name);
-    $('#guesses').html('<p>' + name + ' is the new drawer' + '</p>');
+  //  console.log('New drawer: ' + name);
+  //  $('#guesses').html('<p>' + name + ' is the new drawer' + '</p>');
 };
-
+*/
 let draw = function(obj) {
     context.fillStyle = obj.color;
     context.beginPath();
@@ -116,7 +123,7 @@ let draw = function(obj) {
 let pictionary = function() {
     clearScreen();
     click = true;
-    console.log('draw status: ' + click);
+  //  console.log('draw status: ' + click);
     $('#guess').hide();
     $('#guesses').empty();
     $('.draw').show();
@@ -136,15 +143,15 @@ let pictionary = function() {
         };
     });
 
-    console.log('You are the drawer');
+  //  console.log('You are the drawer');
 
-    $('.users').on('dblclick', 'li', function() {
+  /*  $('.users').on('dblclick', 'li', function() {
         if (click == true) {
             let target = $(this).text();
             socket.emit('swap rooms', {from: user, to: target});
         };
     });
-
+*/
     canvas.on('mousedown', function(event) {
         drawing = true;
     });
@@ -181,8 +188,8 @@ $(document).ready(function() {
     socket.on('draw word', drawWord);
     socket.on('drawer', pictionary);
     socket.on('new drawer', newDrawer);
-    socket.on('correct answer', correctAnswer);
-    socket.on('reset', reset);
+    //socket.on('correct answer', correctAnswer);
+  //  socket.on('reset', reset);
     socket.on('clear screen', clearScreen);
 
 });
