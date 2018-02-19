@@ -103,7 +103,7 @@ app.delete('/gamer', function(req, res){
 
 
 
-//////////////server for web socket
+//////////////server pour web socket
 
 app.use(express.static('public'));
 const io = require('socket.io')(http);
@@ -112,6 +112,7 @@ const port = process.env.PORT || 3000;
 
 let users = [];
 
+// liste de mots à dessiner
 let words = [
   "mot", "lettre", "numéro", "personne", "stylo", "police", "personnes",
   "son", "eau", "petit déjeuner", "lieu", "homme", "femme", "garçon",
@@ -129,136 +130,153 @@ let words = [
    "danser", "chat", "plume", "pigeon"
 ];
 
+
+
+// methode pour retourner un mot aléatoire à partir de la liste de mot
 function newWord() {
-	wordcount = Math.floor(Math.random() * (words.length));
+	let wordcount = Math.floor(Math.random() * (words.length));
+  console.log(wordcount);
+  console.log( "mot aléatoire "+ words[wordcount]);
 	return words[wordcount];
 };
 
-let wordcount;
-
+//
 io.on('connection', function (socket) {
 	io.emit('userlist', users);
 
+
 	socket.on('join', function(name) {
 		socket.username = name;
+    console.log('___________'+ Object.getOwnPropertyNames(socket));
+    console.log('___________'+ Object.keys(io));
 
-		// user automatically joins a room under their own name
+    Object.getOwnPropertyNames(io).forEach(
+      function(val, idx, array) {
+    console.log(val + " -> " + io[val]);
+  });
+		// l'utilisateur rejoint automatiquement une room sous son propre nom
 		socket.join(name);
-		console.log(socket.username + ' has joined. ID: ' + socket.id);
+		console.log(socket.username + ' a rejoint le jeu . ID: ' + socket.id);
 
-		// save the name of the user to an array called users
+		// enregistre le nom de l'utilisateur dans un tableau appelé users
 		users.push(socket.username);
 
-		// if the user is first to join OR 'drawer' room has no connections
+		// si l'utilisateur est le premier à rejoindre la salle OU 'drawer'room n'a aucune connexion
 		if (users.length == 1 || typeof io.sockets.adapter.rooms['drawer'] === 'undefined') {
 
-			// place user into 'drawer' room
+			// on place l'utilisateur dans la room 'drawer'
 			socket.join('drawer');
 
-			// server submits the 'drawer' event to this user
+			// le serveur soumet l'événement 'drawer' à l'utilisateur
 			io.in(socket.username).emit('drawer', socket.username);
-			console.log(socket.username + ' is a drawer');
+			console.log(socket.username + ' est le dessinateur');
 
-			// send the random word to the user inside the 'drawer' room
+			// envoi le mot aléatoire à l'utilisateur à l'intérieur de la room 'drawer'
 			io.in(socket.username).emit('draw word', newWord());
-		//	console.log(socket.username + "'s draw word (join event): " + newWord());
+
+
 		}
 
-		// if there are more than one names in users
-		// or there is a person in drawer room..
+		// s'il y a plus d'un nom d'utilisateurs
+    // ou s'il y a une personne dans la room des drawer .
 		else {
 
-			// additional users will join the 'guesser' room
+			// des utilisateurs supplémentaires rejoignent la room "guesser"
 			socket.join('guesser');
 
-			// server submits the 'guesser' event to this user
+			// server soumet l'événement 'guesser' à l'utilisateur
 			io.in(socket.username).emit('guesser', socket.username);
-			console.log(socket.username + ' is a guesser');
+			console.log(socket.username + ' est un devin');
 		}
 
-		// update all clients with the list of users
+		// met à jour tous les clients avec la liste des utilisateurs
 		io.emit('userlist', users);
 
 	});
 
-	// submit drawing on canvas to other clients
+
+
+
+  // envoi du dessin sur canvas des autres clients
 	socket.on('draw', function(obj) {
 		socket.broadcast.emit('draw', obj);
 	});
 
-	// submit each client's guesses to all clients
+	// envoi des reponses de chaque client à tous les clients
 	socket.on('guessword', function(data) {
 		io.emit('guessword', { username: data.username, guessword: data.guessword})
-		console.log('guessword event triggered on server from: ' + data.username + ' with word: ' + data.guessword);
+		console.log('événement guessword déclenché sur le serveur de: ' + data.username + ' avec le mot : ' + data.guessword);
 	});
 
+  //
 	socket.on('disconnect', function() {
 		for (let i = 0; i < users.length; i++) {
 
-			// remove user from users list
+			// supprime l'utilisateur de la liste des utilisateurs
 			if (users[i] == socket.username) {
 				users.splice(i, 1);
 			};
 		};
-		console.log(socket.username + ' has disconnected.');
+		console.log(socket.username + ' est déconnecté(e).');
 
-		// submit updated users list to all clients
+		// soumet la liste des utilisateurs mise à jour à tous les clients
 		io.emit('userlist', users);
 
-		// if 'drawer' room has no connections..
+		// si la room 'drawer' n'a pas de connexion ..
 		if ( typeof io.sockets.adapter.rooms['drawer'] === "undefined") {
 
-			// generate random number based on length of users list
+			// génére un nombre aléatoire en fonction de la longueur de la liste des utilisateurs
 			let x = Math.floor(Math.random() * (users.length));
 			console.log(users[x]);
 
-			// submit new drawer event to the random user in userslist
+			// soumet un nouvel événement de 'drawer' à l'utilisateur aléatoire dans la liste des utilisateurs
 			io.in(users[x]).emit('new drawer', users[x]);
 		};
 	});
 
 	socket.on('new drawer', function(name) {
 
-		// remove user from 'guesser' room
+		// retire l'utilisateur de la room 'guesser'
 		socket.leave('guesser');
 
-		// place user into 'drawer' room
+		// place l'utilisateur dans 'drawer' room
 		socket.join('drawer');
 		console.log('new drawer emit: ' + name);
 
-		// submit 'drawer' event to the same user
+		// envoi de l'événement 'drawer' au même utilisateur
 		socket.emit('drawer', name);
 
-		// send a random word to the user connected to 'drawer' room
+		// envoi un mot aléatoire à l'utilisateur connecté à la room 'drawer'
 		io.in('drawer').emit('draw word', newWord());
-
 	});
 
-	// initiated from drawer's 'dblclick' event in Player list
+	// initialisation avec l'événement 'dblclick' du dessinateur dans la liste des joueurs
 	socket.on('swap rooms', function(data) {
 
-		// drawer leaves 'drawer' room and joins 'guesser' room
+		// le dessinateur quitte la room 'drawer' et rejoint la room 'guesser'
 		socket.leave('drawer');
 		socket.join('guesser');
 
-		// submit 'guesser' event to this user
+		// soumet l'événement 'guesser' à l'utilisateur
 		socket.emit('guesser', socket.username);
 
-		// submit 'drawer' event to the name of user that was doubleclicked
+		// envoi de l'événement 'drawer' au joueur qui a été doubleclické
 		io.in(data.to).emit('drawer', data.to);
+    console.log('new drawer ou new drawer doubleclické ____'+data.to);
 
-		// submit random word to new user drawer
+		// soumet un mot aléatoire au nouvel utilisateur
 		io.in(data.to).emit('draw word', newWord());
-
 		io.emit('reset', data.to);
 
 	});
 
+  //
 	socket.on('correct answer', function(data) {
 		io.emit('correct answer', data);
-		console.log(data.username + ' guessed correctly with ' + data.guessword);
+		console.log(data.username + ' a deviné correctement avec ' + data.guessword);
 	});
 
+  //
 	socket.on('clear screen', function(name) {
 		io.emit('clear screen', name);
 	});

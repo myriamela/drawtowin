@@ -220,3 +220,12 @@ canvas {
     background-color: blue;
     font-size: 30px;
 }
+
+.canvaspic{
+ position: relative;
+ width: 100%;
+}
+
+h3{
+  font-size: 0.75em;
+}
