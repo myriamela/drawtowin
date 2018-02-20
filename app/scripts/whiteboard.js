@@ -1,8 +1,10 @@
 'use strict';
+//import { userinsc, userconn } from 'form';
+
+const BASE_URL = 'http://localhost:3000/';
 
 let socket = io();
 let user;
-let userjoin = [];
 let context;
 let canvas;
 let click = false;
@@ -27,41 +29,36 @@ $(document).ready(function() {
     socket.on('draw word', drawWord);
     socket.on('drawer', pictionary);
     socket.on('new drawer', newDrawer);
-    socket.on('correct answer', correctAnswer);
-    socket.on('reset', reset);
     socket.on('clear screen', clearScreen);
 
 });
 
 
 
-// boite de dialogue pour le pseudonyme des Joueurs
+//
 function usernameAsk() {
-    $('.grey-out').fadeIn(500);
-    $('.user').fadeIn(500);
-    $('.user').submit(function(){
-        event.preventDefault();
-        user = $('#username').val().trim();
-
-        if (user == '') {
-            return false
-        };
-
-        let index = users.indexOf(user);
-
-        if (index > -1) {
-            alert(user + ' est déjà utilisé');
-            return false
-        };
-
-        socket.emit('join', user);
-        console.log('user_____'+user);
-        $('.grey-out').fadeOut(300);
-        $('.user').fadeOut(300);
+        $.ajax({
+            url: BASE_URL + 'gamer',
+            type: 'GET',
+            dataType: 'json',
+            success: function(data){
+              alert('super');
+              console.log(data);
+              if(typeof (data) === 'object' ){
+                user = data[0]['name'];
+              }else{
+                user = data;
+              }
+              socket.emit('join', user);
+              console.log('user_____'+user);
+            },
+            error: function(data){
+              console.log(data);
+              console.log('HTTP error');
+            }
+        });
         $('input.guess-input').focus();
-        userjoin.push(user);
-        console.log(userjoin);
-    });
+
 };
 
 
@@ -72,8 +69,7 @@ let guesser = function() {
     click = false;
     console.log('draw status: ' + click);
     $('.draw').hide();
-    //$('#guesses').empty();
-    $('#guesses').html('<p>' + user[0] + ' est le dessinateur' + '</p>');
+    $('#guesses').empty();
     console.log(user + ' est un devin');
     $(".titre").text('Bienvenue '+ user + ' dans Pictionary');
     $('#guess').show();
@@ -95,11 +91,10 @@ let guesser = function() {
 
 // reponse envoyé par le joueur qui doit deviner
 let guessword = function(data){
-    $('#guesses').text(data.username + " devine : " + data.guessword);
+    //$('#guesses').text(data.username + " devine : " + data.guessword);
 
     if (click == true && data.guessword == $('span.word').text() ) {
         console.log('devin : ' + data.username + ' mot à dessiner : ' + $('span.word').text());
-        socket.emit('correct answer', {username: data.username, guessword: data.guessword});
         socket.emit('swap rooms', {from: user, to: data.username});
         click = false;
     }
@@ -131,20 +126,6 @@ let newDrawer = function() {
     clearScreen();
     $('#guesses').empty();
 };
-
-// reponse quand le mot trouvé est le bon dans une div de la page html
-let correctAnswer = function(data) {
-    $('#guesses').html('<p>' + data.username + ' ,vous avez deviné !' + '</p>');
-};
-
-// met a zero le canvas et informe tous les joueurs du nouveau dessinateur
-let reset = function(name) {
-    clearScreen();
-    $('#guesses').empty();
-    console.log('New drawer: ' + name);
-    $('#guesses').html('<p>' + name + ' est le new dessinateur' + '</p>');
-};
-
 
 // fonction pour faire un point
 let draw = function(obj) {
@@ -183,14 +164,6 @@ let pictionary = function() {
     });
 
     console.log(user +' est le dessinateur');
-
-    // le dessinateur choisi un autre dessinateur et deviendra un devin
-    $('.users').on('dblclick', 'li', function() {
-        if (click == true) {
-            let target = $(this).text();
-            socket.emit('swap rooms', {from: user, to: target});
-        };
-    });
 
     canvas.on('mousedown', function(event) {
         drawing = true;

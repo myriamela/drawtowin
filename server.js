@@ -1,9 +1,11 @@
 
 const PORT = 7000;
 const express = require('express');
+const session	=	require('express-session');
 const app = express();
 const http = require('http').Server(app);
 
+app.use(session({secret: 'LdfsfhKirbfg',saveUninitialized: true,resave: true}));
 
 const mysql = require('mysql');
 
@@ -21,13 +23,35 @@ app.use('/', express.static(__dirname + '/app'));
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.get('/logout',function(req,res){
+	req.session.destroy(function(err){
+		if(err){
+			console.log(err);
+		}
+		else
+		{
+			res.redirect('/');
+		}
+	});
+
+});
+
+// recupere methode get element de session du joueur
+app.get('/gamer',function(req,res){
+
+  if (!req.session || !req.session.authenticated) {
+    res.status(403).end('Forbidden');
+  }
+  res.json(req.session.user);
+
+});
 
 
 // récupère le gamer a partir de l email et du password
 app.post('/gamer/login', function (req, res) {
 	let sql = `SELECT * FROM gamers WHERE email= ? AND password= ? `;
   let body = [req.body.email, req.body.password];
-  console.log(req);
+  console.log(req.body);
   console.log('email ', req.body.email);
   console.log('pass ', req.body.password);
 	db.query(sql, body, function(err, gamer){
@@ -35,10 +59,13 @@ app.post('/gamer/login', function (req, res) {
       res.json({"ErrorSQL": true, "Message":"Error Execute Sql"});
     }else {
       if(gamer.length > 0){
-        res.json({"Error": false, "Message": "Success", "Gamer" : gamer});
+        req.session.authenticated = true;
+        req.session.user = gamer;
+        res.json({"Error": false, "Message": "ok_conn", gamer});
       }
 			else{
           res.json({"Error": true, "Message":"Erreur de saisie ou vous n'avez pas de compte"});
+          //res.end('done');
       }
     }
   });
@@ -63,13 +90,17 @@ app.post('/gamer', function(req, res){
 	let body = req.body.newGamer;
   let elem = [body.email, body.name , body.password];
 	console.log(req.body);
-  db.query(sql, elem, function(err,gamer){
+  db.query(sql, elem, function(err,result){
   	if(err){
 			console.log(err);
       res.json({"Error": true, "Message": "SQL Error"});
     } else {
-	     // je renvoi l id cree
-	     res.json(gamer.insertId);
+      let name = req.body.newGamer.name;
+      req.session.authenticated = true;
+      req.session.user = name;
+      console.log(name);
+      res.json({"Error": false, "Message": "ok_insc", "Name": name });
+
     }
   });
 });
@@ -105,7 +136,7 @@ app.delete('/gamer', function(req, res){
 
 //////////////server pour web socket
 
-app.use(express.static('public'));
+app.use(express.static('app'));
 const io = require('socket.io')(http);
 const port = process.env.PORT || 3000;
 
@@ -134,26 +165,22 @@ let words = [
 
 // methode pour retourner un mot aléatoire à partir de la liste de mot
 function newWord() {
-	let wordcount = Math.floor(Math.random() * (words.length));
-  console.log(wordcount);
-  console.log( "mot aléatoire "+ words[wordcount]);
-	return words[wordcount];
+	 let wordcount = Math.floor(Math.random() * (words.length));
+   console.log( "mot aléatoire "+ words[wordcount]);
+	 return words[wordcount];
 };
 
-//
+// fonction sera exécutée à chaque fois qu'un utilisateur se connecte au socket via la voie express "/"
 io.on('connection', function (socket) {
+  // fonction émet une liste de joueurs
 	io.emit('userlist', users);
 
-
+ // r
 	socket.on('join', function(name) {
 		socket.username = name;
     console.log('___________'+ Object.getOwnPropertyNames(socket));
     console.log('___________'+ Object.keys(io));
 
-    Object.getOwnPropertyNames(io).forEach(
-      function(val, idx, array) {
-    console.log(val + " -> " + io[val]);
-  });
 		// l'utilisateur rejoint automatiquement une room sous son propre nom
 		socket.join(name);
 		console.log(socket.username + ' a rejoint le jeu . ID: ' + socket.id);
@@ -195,8 +222,6 @@ io.on('connection', function (socket) {
 	});
 
 
-
-
   // envoi du dessin sur canvas des autres clients
 	socket.on('draw', function(obj) {
 		socket.broadcast.emit('draw', obj);
@@ -225,23 +250,16 @@ io.on('connection', function (socket) {
 		// si la room 'drawer' n'a pas de connexion ..
 		if ( typeof io.sockets.adapter.rooms['drawer'] === "undefined") {
 
-			// génére un nombre aléatoire en fonction de la longueur de la liste des utilisateurs
-			let x = Math.floor(Math.random() * (users.length));
-			console.log(users[x]);
-
 			// soumet un nouvel événement de 'drawer' à l'utilisateur aléatoire dans la liste des utilisateurs
-			io.in(users[x]).emit('new drawer', users[x]);
+			io.in(users[0]).emit('new drawer', users[1]);
 		};
 	});
 
 	socket.on('new drawer', function(name) {
 
-		// retire l'utilisateur de la room 'guesser'
-		socket.leave('guesser');
-
 		// place l'utilisateur dans 'drawer' room
 		socket.join('drawer');
-		console.log('new drawer emit: ' + name);
+		//console.log('new drawer emit: ' + name);
 
 		// envoi de l'événement 'drawer' au même utilisateur
 		socket.emit('drawer', name);
@@ -253,27 +271,16 @@ io.on('connection', function (socket) {
 	// initialisation avec l'événement 'dblclick' du dessinateur dans la liste des joueurs
 	socket.on('swap rooms', function(data) {
 
-		// le dessinateur quitte la room 'drawer' et rejoint la room 'guesser'
-		socket.leave('drawer');
-		socket.join('guesser');
-
 		// soumet l'événement 'guesser' à l'utilisateur
 		socket.emit('guesser', socket.username);
 
 		// envoi de l'événement 'drawer' au joueur qui a été doubleclické
-		io.in(data.to).emit('drawer', data.to);
-    console.log('new drawer ou new drawer doubleclické ____'+data.to);
+		 io.in(data.to).emit('drawer', data.to);
+     console.log('new drawer '+data.to);
 
 		// soumet un mot aléatoire au nouvel utilisateur
 		io.in(data.to).emit('draw word', newWord());
-		io.emit('reset', data.to);
 
-	});
-
-  //
-	socket.on('correct answer', function(data) {
-		io.emit('correct answer', data);
-		console.log(data.username + ' a deviné correctement avec ' + data.guessword);
 	});
 
   //

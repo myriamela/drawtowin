@@ -8,20 +8,11 @@
     <link rel="stylesheet" href="styles/style.css">
   </head>
   <body background="images/pic.jpg">
-    <div class="grey-out hidden">
-      <form class="user">
-        <label for="username">Entrer un pseudonyme </label>
-        <br><br>
-        <input id="username" type="text"  maxlength="14" autofocus>
-        <br><br>
-        <button type="submit" id="submitname"  onclick="setTimeout(myFunction, 30000);">Go</button>
-      </form>
-    </div>
     <div id="main">
         <h1 class="titre" >Pictionary</h1>
         <div id="top-message">
             <div class="draw hidden" >
-                <p>Le mot à dessiner : <span class="word"></span></p>
+                <p>Le mot à dessiner : <span class="word"></span></p><span id="session"></span>
             </div>
             <form id="guess" class="hidden" >
                 Deviner le mot! <input name="guess" class="guess-input" type="text">
@@ -33,7 +24,7 @@
             <div>Joueurs en ligne</div>
             <ul></ul>
             <img src="images/canvaspic.jpg" class="canvaspic" >
-            <div id="guesses"></div><br>
+            <div id="guesses"></div>
             <div class="draw-buttons">
               <h3>Choisis une couleur</h3>
               <button value="0" class="clear" type="button">X</button>
@@ -49,8 +40,8 @@
     </div>
       <!-- JS -->
     <script src="//code.jquery.com/jquery-2.1.0.js"></script>
-    <!-- <script src="//cdnjs.cloudflare.com/ajax/libs/handlebars.js/1.3.0/handlebars.js"></script> -->
     <script src="/socket.io/socket.io.js"></script>
     <script src="scripts/whiteboard.js"></script>
+
   </body>
 </html>

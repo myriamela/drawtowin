@@ -1,5 +1,5 @@
-'use strict';
-const BASE_URL = 'http://localhost:3000/'
+//'use strict';
+const BASE_URL = 'http://localhost:3000/';
 
 /*const pour login form*/
 const $loginformemail = $('#login-form-email');// input from user
@@ -29,6 +29,7 @@ function Partie(gamer1, gamer2, scoreGamer1, scoreGamer2) {
 
 $registerformsubmit.on('click', register);
 
+
 function register(){
 let newGamer = new Gamer($registerformemail.val(), $registerformuname.val(), $registerformpassword.val());
   $.ajax({
@@ -39,7 +40,7 @@ let newGamer = new Gamer($registerformemail.val(), $registerformuname.val(), $re
   		success: function(){
   			alert('super');
         console.log(newGamer);
-        window.location.href = './public/listbutton.html';
+        window.location.href = './canvas2.html';
   		},
   		error: function(){
   			console.log('HTTP error');
@@ -49,7 +50,7 @@ let newGamer = new Gamer($registerformemail.val(), $registerformuname.val(), $re
 }
 
 $loginformsubmit.on('click', login);
-
+let userconn = '';
 function login(){
   console.log($loginformemail.val().trim());
   console.log($loginformpassword.val().trim());
@@ -65,8 +66,9 @@ function login(){
         if(resp['Error']){
           alert("Message : "+ resp['Message']);
         }else{
-          alert("Message : "+ resp['Message']);
-          window.location.href = './public/listbutton.html';
+          alert("Message : "+ resp['Message'] +' & Joueur : '+ resp['gamer'][0]['name']);
+          window.location.href = './canvas2.html';
+
         }
   		},
   		error: function(resp){
@@ -74,3 +76,5 @@ function login(){
   		}
 	})
 }
+
+//export { userinsc, userconn };
